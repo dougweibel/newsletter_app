@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Local app data
+data/
+config/
+*.sqlite3
+*.db
+
+# Test/cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
