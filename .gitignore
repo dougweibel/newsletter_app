@@ -15,10 +15,9 @@ venv/
 .idea/
 
 # Local app data
-data/
+data/*.sqlite3
+data/*.db
 config/
-*.sqlite3
-*.db
 
 # Test/cache
 .pytest_cache/
