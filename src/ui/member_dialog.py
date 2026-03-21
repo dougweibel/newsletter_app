@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -14,21 +15,24 @@ class MemberDialog(QDialog):
     def __init__(self, parent=None, member: Member | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Member" if member is None else "Edit Member")
-        self.resize(420, 260)
+        self.resize(420, 300)
 
         self.original_member = member
 
-        self.name_edit = QLineEdit()
+        self.first_name_edit = QLineEdit()
+        self.last_name_edit = QLineEdit()
         self.email_edit = QLineEdit()
         self.notes_edit = QTextEdit()
 
         if member is not None:
-            self.name_edit.setText(member.name)
+            self.first_name_edit.setText(member.first_name)
+            self.last_name_edit.setText(member.last_name)
             self.email_edit.setText(member.email)
             self.notes_edit.setPlainText(member.notes)
 
         layout = QFormLayout(self)
-        layout.addRow("Name", self.name_edit)
+        layout.addRow("First Name", self.first_name_edit)
+        layout.addRow("Last Name", self.last_name_edit)
         layout.addRow("Email", self.email_edit)
         layout.addRow("Notes", self.notes_edit)
 
@@ -40,11 +44,16 @@ class MemberDialog(QDialog):
         layout.addRow(self.button_box)
 
     def validate_and_accept(self) -> None:
-        name = self.name_edit.text().strip()
+        first_name = self.first_name_edit.text().strip()
+        last_name = self.last_name_edit.text().strip()
         email = self.email_edit.text().strip()
 
-        if not name:
-            QMessageBox.warning(self, "Validation Error", "Name is required.")
+        if not first_name:
+            QMessageBox.warning(self, "Validation Error", "First name is required.")
+            return
+
+        if not last_name:
+            QMessageBox.warning(self, "Validation Error", "Last name is required.")
             return
 
         if not email:
@@ -62,7 +71,8 @@ class MemberDialog(QDialog):
 
         return Member(
             id=member_id,
-            name=self.name_edit.text().strip(),
+            first_name=self.first_name_edit.text().strip(),
+            last_name=self.last_name_edit.text().strip(),
             email=self.email_edit.text().strip(),
             notes=self.notes_edit.toPlainText().strip(),
         )

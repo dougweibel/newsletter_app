@@ -10,9 +10,9 @@ class MemberListItemWidget(QWidget):
         layout.setContentsMargins(8, 6, 8, 6)
         layout.setSpacing(4)
 
-        title_label = QLabel(f"{member.name}  <{member.email}>")
+        title_label = QLabel(f"{member.full_name}  <{member.email}>")
         title_label.setStyleSheet(
-            "font-size: 14px; font-weight: 600; color: #ffffff;"
+            "font-size: 14px; font-weight: 600; color: #000000;"
         )
         layout.addWidget(title_label)
 
@@ -24,7 +24,7 @@ class MemberListItemWidget(QWidget):
             notes_label = QLabel()
             notes_label.setText(
                 f'<span style="color: #2f9e44; font-weight: 600;">Notes:</span> '
-                f'<span style="color: #ffffff;">{notes_preview}</span>'
+                f'<span style="color: #000000;">{notes_preview}</span>'
             )
             notes_label.setWordWrap(True)
             layout.addWidget(notes_label)

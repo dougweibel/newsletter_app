@@ -7,16 +7,17 @@ class MemberRepository:
         with get_connection() as conn:
             rows = conn.execute(
                 """
-                SELECT id, name, email, notes
+                SELECT id, first_name, last_name, email, notes
                 FROM members
-                ORDER BY name COLLATE NOCASE
+                ORDER BY last_name COLLATE NOCASE, first_name COLLATE NOCASE
                 """
             ).fetchall()
 
         return [
             Member(
                 id=row["id"],
-                name=row["name"],
+                first_name=row["first_name"],
+                last_name=row["last_name"],
                 email=row["email"],
                 notes=row["notes"] or "",
             )
@@ -27,7 +28,7 @@ class MemberRepository:
         with get_connection() as conn:
             row = conn.execute(
                 """
-                SELECT id, name, email, notes
+                SELECT id, first_name, last_name, email, notes
                 FROM members
                 WHERE id = ?
                 """,
@@ -39,7 +40,8 @@ class MemberRepository:
 
         return Member(
             id=row["id"],
-            name=row["name"],
+            first_name=row["first_name"],
+            last_name=row["last_name"],
             email=row["email"],
             notes=row["notes"] or "",
         )
@@ -48,10 +50,10 @@ class MemberRepository:
         with get_connection() as conn:
             cursor = conn.execute(
                 """
-                INSERT INTO members (name, email, notes)
-                VALUES (?, ?, ?)
+                INSERT INTO members (first_name, last_name, email, notes)
+                VALUES (?, ?, ?, ?)
                 """,
-                (member.name, member.email, member.notes),
+                (member.first_name, member.last_name, member.email, member.notes),
             )
             conn.commit()
             return int(cursor.lastrowid)
@@ -64,10 +66,16 @@ class MemberRepository:
             conn.execute(
                 """
                 UPDATE members
-                SET name = ?, email = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+                SET first_name = ?, last_name = ?, email = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
-                (member.name, member.email, member.notes, member.id),
+                (
+                    member.first_name,
+                    member.last_name,
+                    member.email,
+                    member.notes,
+                    member.id,
+                ),
             )
             conn.commit()
 

@@ -124,7 +124,7 @@ class MembersWidget(QWidget):
         response = QMessageBox.question(
             self,
             "Confirm Delete",
-            f"Delete member '{member.name}'?",
+            f"Delete member '{member.full_name}'?",
             QMessageBox.Yes | QMessageBox.No,
         )
 
