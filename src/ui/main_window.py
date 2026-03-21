@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 from src.ui.members_widget import MembersWidget
 from src.ui.events_widget import EventsWidget
 
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -18,13 +19,15 @@ class MainWindow(QMainWindow):
 
         central = QWidget()
         layout = QVBoxLayout(central)
+        layout.setSpacing(14)
+        layout.setContentsMargins(24, 24, 24, 24)
 
         title = QLabel("Newsletter Information Gathering App")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title.setObjectName("titleLabel")
         layout.addWidget(title)
 
         subtitle = QLabel("Starter shell for Milestone 1")
-        subtitle.setStyleSheet("color: blue;")
+        subtitle.setObjectName("subtitleLabel")
         layout.addWidget(subtitle)
 
         members_button = QPushButton("Members")
@@ -45,6 +48,53 @@ class MainWindow(QMainWindow):
 
         layout.addStretch()
         self.setCentralWidget(central)
+
+        self.apply_styles()
+
+    def apply_styles(self) -> None:
+        self.setStyleSheet(
+            """
+            QMainWindow {
+                background-color: #e9eef2;
+            }
+
+            QWidget {
+                background-color: #e9eef2;
+                color: #1f2933;
+                font-size: 14px;
+            }
+
+            QLabel#titleLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: #102a43;
+                margin-bottom: 4px;
+            }
+
+            QLabel#subtitleLabel {
+                color: "blue";
+                margin-bottom: 12px;
+            }
+
+            QPushButton {
+                background-color: #486581;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 14px;
+                text-align: left;
+                font-size: 14px;
+            }
+
+            QPushButton:hover {
+                background-color: #334e68;
+            }
+
+            QPushButton:pressed {
+                background-color: #243b53;
+            }
+            """
+        )
 
     def show_members(self) -> None:
         self.members_window = MembersWidget()
