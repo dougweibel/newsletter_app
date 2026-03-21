@@ -1,3 +1,4 @@
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -11,13 +12,14 @@ from PySide6.QtWidgets import (
 
 from src.storage.member_repository import MemberRepository
 from src.ui.member_dialog import MemberDialog
+from src.ui.member_list_item_widget import MemberListItemWidget
 
 
 class MembersWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Members")
-        self.resize(600, 420)
+        self.resize(650, 460)
 
         self.repository = MemberRepository()
 
@@ -28,6 +30,7 @@ class MembersWidget(QWidget):
         layout.addWidget(title)
 
         self.member_list = QListWidget()
+        self.member_list.setSpacing(4)
         layout.addWidget(self.member_list)
 
         button_row = QHBoxLayout()
@@ -53,20 +56,27 @@ class MembersWidget(QWidget):
         members = self.repository.list_members()
 
         if not members:
-            self.member_list.addItem("No members yet")
+            item = QListWidgetItem("No members yet")
+            self.member_list.addItem(item)
             return
 
         for member in members:
-            item = QListWidgetItem(f"{member.name}  <{member.email}>")
-            item.setData(256, member.id)
+            item = QListWidgetItem()
+            item.setData(Qt.UserRole, member.id)
+            item.setToolTip(member.notes or "")
+            item.setSizeHint(QSize(0, 58 if member.notes else 34))
+
+            widget = MemberListItemWidget(member)
+
             self.member_list.addItem(item)
+            self.member_list.setItemWidget(item, widget)
 
     def get_selected_member_id(self) -> int | None:
         item = self.member_list.currentItem()
         if item is None:
             return None
 
-        member_id = item.data(256)
+        member_id = item.data(Qt.UserRole)
         if member_id is None:
             return None
 
