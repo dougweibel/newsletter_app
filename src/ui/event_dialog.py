@@ -7,21 +7,27 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QLineEdit,
+    QListWidget,
+    QListWidgetItem,
     QMessageBox,
     QSpinBox,
     QTextEdit,
 )
 
 from src.models.event import Event
+from src.storage.member_event_repository import MemberEventRepository
+from src.storage.member_repository import MemberRepository
 
 
 class EventDialog(QDialog):
     def __init__(self, parent=None, event: Event | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Event" if event is None else "Edit Event")
-        self.resize(520, 680)
+        self.resize(560, 760)
 
         self.original_event = event
+        self.member_repository = MemberRepository()
+        self.member_event_repository = MemberEventRepository()
 
         self.title_edit = QLineEdit()
         self.description_edit = QTextEdit()
@@ -67,6 +73,9 @@ class EventDialog(QDialog):
         self.seasonal_end_month_spin.setRange(0, 12)
         self.seasonal_end_month_spin.setSpecialValueText("")
 
+        self.associated_members_list = QListWidget()
+        self.associated_members_list.setMinimumHeight(180)
+
         layout = QFormLayout(self)
         layout.addRow("Title", self.title_edit)
         layout.addRow("Description", self.description_edit)
@@ -87,6 +96,7 @@ class EventDialog(QDialog):
         layout.addRow("Recurrence Day of Month", self.recurrence_day_of_month_spin)
         layout.addRow("Seasonal Start Month", self.seasonal_start_month_spin)
         layout.addRow("Seasonal End Month", self.seasonal_end_month_spin)
+        layout.addRow("Associated Members", self.associated_members_list)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.button_box.accepted.connect(self.validate_and_accept)
@@ -99,6 +109,7 @@ class EventDialog(QDialog):
         if event is not None:
             self._load_event(event)
 
+        self._load_member_choices()
         self._update_enabled_states()
 
     def _build_date_edit(self) -> QDateEdit:
@@ -114,6 +125,32 @@ class EventDialog(QDialog):
         parsed = QDate.fromString(value, Qt.ISODate)
         if parsed.isValid():
             widget.setDate(parsed)
+
+    def _load_member_choices(self) -> None:
+        selected_member_ids: set[int] = set()
+        if self.original_event is not None and self.original_event.id is not None:
+            selected_member_ids = set(
+                self.member_event_repository.list_member_ids_for_event(self.original_event.id)
+            )
+
+        for member in self.member_repository.list_members():
+            item = QListWidgetItem(f"{member.full_name} - {member.email}")
+            item.setData(Qt.UserRole, member.id)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(
+                Qt.Checked if member.id in selected_member_ids else Qt.Unchecked
+            )
+            item.setToolTip(member.notes or "")
+            self.associated_members_list.addItem(item)
+
+    def selected_member_ids(self) -> list[int]:
+        member_ids: list[int] = []
+        for index in range(self.associated_members_list.count()):
+            item = self.associated_members_list.item(index)
+            member_id = item.data(Qt.UserRole)
+            if member_id is not None and item.checkState() == Qt.Checked:
+                member_ids.append(int(member_id))
+        return member_ids
 
     def _update_enabled_states(self) -> None:
         is_one_time = self.event_kind_combo.currentText() == "one_time"

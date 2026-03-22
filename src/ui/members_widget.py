@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
 )
 
+from src.storage.member_event_repository import MemberEventRepository
 from src.storage.member_repository import MemberRepository
 from src.ui.member_dialog import MemberDialog
 from src.ui.member_list_item_widget import MemberListItemWidget
@@ -19,9 +20,10 @@ class MembersWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Members")
-        self.resize(650, 460)
+        self.resize(700, 520)
 
         self.repository = MemberRepository()
+        self.member_event_repository = MemberEventRepository()
 
         layout = QVBoxLayout(self)
 
@@ -64,9 +66,19 @@ class MembersWidget(QWidget):
             item = QListWidgetItem()
             item.setData(Qt.UserRole, member.id)
             item.setToolTip(member.notes or "")
-            item.setSizeHint(QSize(0, 58 if member.notes else 34))
 
-            widget = MemberListItemWidget(member)
+            associated_event_titles = []
+            if member.id is not None:
+                associated_event_titles = self.member_event_repository.list_event_titles_for_member(member.id)
+
+            line_count = 1
+            if associated_event_titles:
+                line_count += 1
+            if member.notes:
+                line_count += 1
+            item.setSizeHint(QSize(0, 34 + (line_count - 1) * 24))
+
+            widget = MemberListItemWidget(member, associated_event_titles)
 
             self.member_list.addItem(item)
             self.member_list.setItemWidget(item, widget)
@@ -86,7 +98,10 @@ class MembersWidget(QWidget):
         dialog = MemberDialog(self)
         if dialog.exec():
             member = dialog.get_member_data()
-            self.repository.create_member(member)
+            member_id = self.repository.create_member(member)
+            self.member_event_repository.replace_events_for_member(
+                member_id, dialog.selected_event_ids()
+            )
             self.refresh_members()
             QMessageBox.information(self, "Saved", "Member added successfully.")
 
@@ -106,6 +121,9 @@ class MembersWidget(QWidget):
         if dialog.exec():
             updated_member = dialog.get_member_data()
             self.repository.update_member(updated_member)
+            self.member_event_repository.replace_events_for_member(
+                member_id, dialog.selected_event_ids()
+            )
             self.refresh_members()
             QMessageBox.information(self, "Saved", "Member updated successfully.")
 

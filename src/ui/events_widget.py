@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -11,16 +11,19 @@ from PySide6.QtWidgets import (
 )
 
 from src.storage.event_repository import EventRepository
+from src.storage.member_event_repository import MemberEventRepository
 from src.ui.event_dialog import EventDialog
+from src.ui.event_list_item_widget import EventListItemWidget
 
 
 class EventsWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Events")
-        self.resize(760, 500)
+        self.resize(800, 540)
 
         self.repository = EventRepository()
+        self.member_event_repository = MemberEventRepository()
 
         layout = QVBoxLayout(self)
 
@@ -29,6 +32,7 @@ class EventsWidget(QWidget):
         layout.addWidget(title)
 
         self.event_list = QListWidget()
+        self.event_list.setSpacing(4)
         layout.addWidget(self.event_list)
 
         button_row = QHBoxLayout()
@@ -57,20 +61,25 @@ class EventsWidget(QWidget):
             self.event_list.addItem(QListWidgetItem("No events yet"))
             return
 
-        for event in events:
-            summary_parts = [event.title]
-            if event.event_kind == "one_time" and event.one_time_date:
-                summary_parts.append(f"({event.one_time_date})")
-            elif event.event_kind == "recurring":
-                frequency = event.recurrence_frequency or "recurring"
-                summary_parts.append(f"[{frequency}]")
-            if event.location:
-                summary_parts.append(f"- {event.location}")
+        for event_record in events:
+            item = QListWidgetItem()
+            item.setData(Qt.UserRole, event_record.id)
+            item.setToolTip(event_record.description or event_record.other_info or "")
 
-            item = QListWidgetItem(" ".join(summary_parts))
-            item.setData(Qt.UserRole, event.id)
-            item.setToolTip(event.description or event.other_info or "")
+            associated_member_names = []
+            if event_record.id is not None:
+                associated_member_names = self.member_event_repository.list_member_names_for_event(event_record.id)
+
+            line_count = 1
+            if associated_member_names:
+                line_count += 1
+            if event_record.description or event_record.other_info:
+                line_count += 1
+            item.setSizeHint(QSize(0, 34 + (line_count - 1) * 24))
+
+            widget = EventListItemWidget(event_record, associated_member_names)
             self.event_list.addItem(item)
+            self.event_list.setItemWidget(item, widget)
 
     def get_selected_event_id(self) -> int | None:
         item = self.event_list.currentItem()
@@ -86,8 +95,11 @@ class EventsWidget(QWidget):
     def add_event(self) -> None:
         dialog = EventDialog(self)
         if dialog.exec():
-            event = dialog.get_event_data()
-            self.repository.create_event(event)
+            event_record = dialog.get_event_data()
+            event_id = self.repository.create_event(event_record)
+            self.member_event_repository.replace_members_for_event(
+                event_id, dialog.selected_member_ids()
+            )
             self.refresh_events()
             QMessageBox.information(self, "Saved", "Event added successfully.")
 
@@ -97,16 +109,19 @@ class EventsWidget(QWidget):
             QMessageBox.warning(self, "No Selection", "Please select an event to edit.")
             return
 
-        event = self.repository.get_event(event_id)
-        if event is None:
+        event_record = self.repository.get_event(event_id)
+        if event_record is None:
             QMessageBox.warning(self, "Not Found", "Selected event could not be found.")
             self.refresh_events()
             return
 
-        dialog = EventDialog(self, event)
+        dialog = EventDialog(self, event_record)
         if dialog.exec():
             updated_event = dialog.get_event_data()
             self.repository.update_event(updated_event)
+            self.member_event_repository.replace_members_for_event(
+                event_id, dialog.selected_member_ids()
+            )
             self.refresh_events()
             QMessageBox.information(self, "Saved", "Event updated successfully.")
 
@@ -116,8 +131,8 @@ class EventsWidget(QWidget):
             QMessageBox.warning(self, "No Selection", "Please select an event to delete.")
             return
 
-        event = self.repository.get_event(event_id)
-        if event is None:
+        event_record = self.repository.get_event(event_id)
+        if event_record is None:
             QMessageBox.warning(self, "Not Found", "Selected event could not be found.")
             self.refresh_events()
             return
@@ -125,7 +140,7 @@ class EventsWidget(QWidget):
         response = QMessageBox.question(
             self,
             "Confirm Delete",
-            f"Delete event '{event.title}'?",
+            f"Delete event '{event_record.title}'?",
             QMessageBox.Yes | QMessageBox.No,
         )
 
