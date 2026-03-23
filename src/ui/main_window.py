@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 
 from src.ui.members_widget import MembersWidget
 from src.ui.events_widget import EventsWidget
+from src.ui.solicitation_widget import SolicitationWidget
 
 
 class MainWindow(QMainWindow):
@@ -26,7 +27,7 @@ class MainWindow(QMainWindow):
         title.setObjectName("titleLabel")
         layout.addWidget(title)
 
-        subtitle = QLabel("Starter shell for Milestone 1")
+        subtitle = QLabel("Members, events, and solicitation workflow")
         subtitle.setObjectName("subtitleLabel")
         layout.addWidget(subtitle)
 
@@ -38,8 +39,8 @@ class MainWindow(QMainWindow):
         events_button.clicked.connect(self.show_events)
         layout.addWidget(events_button)
 
-        solicitation_button = QPushButton("Generate Solicitation Text")
-        solicitation_button.clicked.connect(self.show_placeholder)
+        solicitation_button = QPushButton("Solicitation Workflow")
+        solicitation_button.clicked.connect(self.show_solicitation)
         layout.addWidget(solicitation_button)
 
         newsletter_button = QPushButton("Generate Newsletter File")
@@ -103,6 +104,10 @@ class MainWindow(QMainWindow):
     def show_events(self) -> None:
         self.events_window = EventsWidget()
         self.events_window.show()
+
+    def show_solicitation(self) -> None:
+        self.solicitation_window = SolicitationWidget()
+        self.solicitation_window.show()
 
     def show_placeholder(self) -> None:
         QMessageBox.information(

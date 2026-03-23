@@ -38,6 +38,7 @@ def test_create_and_list_one_time_event() -> None:
     assert events[0].event_kind == "one_time"
     assert events[0].one_time_date == "2026-04-15"
     assert events[0].location == "Library"
+    assert events[0].solicitation_status == "not_started"
 
 
 
@@ -110,6 +111,10 @@ def test_update_event() -> None:
             recurrence_day_of_month=1,
             seasonal_start_month=6,
             seasonal_end_month=6,
+            solicitation_status="draft_ready",
+            solicitation_last_generated_at="2026-03-22 10:00",
+            solicitation_last_sent_at="2026-03-23 11:00",
+            solicitation_notes="Waiting on updated copy.",
         )
     )
 
@@ -122,6 +127,10 @@ def test_update_event() -> None:
     assert updated.recurrence_frequency == "yearly"
     assert updated.location == "Multiple homes"
     assert updated.other_info == "Tickets required"
+    assert updated.solicitation_status == "draft_ready"
+    assert updated.solicitation_last_generated_at == "2026-03-22 10:00"
+    assert updated.solicitation_last_sent_at == "2026-03-23 11:00"
+    assert updated.solicitation_notes == "Waiting on updated copy."
 
 
 

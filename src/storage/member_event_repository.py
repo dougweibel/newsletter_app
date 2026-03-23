@@ -79,7 +79,11 @@ class MemberEventRepository:
                     e.recurrence_day_of_week,
                     e.recurrence_day_of_month,
                     e.seasonal_start_month,
-                    e.seasonal_end_month
+                    e.seasonal_end_month,
+                    e.solicitation_status,
+                    e.solicitation_last_generated_at,
+                    e.solicitation_last_sent_at,
+                    e.solicitation_notes
                 FROM events e
                 INNER JOIN member_events me ON me.event_id = e.id
                 WHERE me.member_id = ?
@@ -140,4 +144,8 @@ class MemberEventRepository:
             recurrence_day_of_month=row["recurrence_day_of_month"],
             seasonal_start_month=row["seasonal_start_month"],
             seasonal_end_month=row["seasonal_end_month"],
+            solicitation_status=row["solicitation_status"] or "not_started",
+            solicitation_last_generated_at=row["solicitation_last_generated_at"] or "",
+            solicitation_last_sent_at=row["solicitation_last_sent_at"] or "",
+            solicitation_notes=row["solicitation_notes"] or "",
         )

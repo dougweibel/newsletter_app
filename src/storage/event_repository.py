@@ -26,7 +26,11 @@ class EventRepository:
                     recurrence_day_of_week,
                     recurrence_day_of_month,
                     seasonal_start_month,
-                    seasonal_end_month
+                    seasonal_end_month,
+                    solicitation_status,
+                    solicitation_last_generated_at,
+                    solicitation_last_sent_at,
+                    solicitation_notes
                 FROM events
                 ORDER BY title COLLATE NOCASE, id
                 """
@@ -57,7 +61,11 @@ class EventRepository:
                     recurrence_day_of_week,
                     recurrence_day_of_month,
                     seasonal_start_month,
-                    seasonal_end_month
+                    seasonal_end_month,
+                    solicitation_status,
+                    solicitation_last_generated_at,
+                    solicitation_last_sent_at,
+                    solicitation_notes
                 FROM events
                 WHERE id = ?
                 """,
@@ -91,8 +99,12 @@ class EventRepository:
                     recurrence_day_of_week,
                     recurrence_day_of_month,
                     seasonal_start_month,
-                    seasonal_end_month
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    seasonal_end_month,
+                    solicitation_status,
+                    solicitation_last_generated_at,
+                    solicitation_last_sent_at,
+                    solicitation_notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 self._event_values(event),
             )
@@ -126,6 +138,10 @@ class EventRepository:
                     recurrence_day_of_month = ?,
                     seasonal_start_month = ?,
                     seasonal_end_month = ?,
+                    solicitation_status = ?,
+                    solicitation_last_generated_at = ?,
+                    solicitation_last_sent_at = ?,
+                    solicitation_notes = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
@@ -166,6 +182,10 @@ class EventRepository:
             recurrence_day_of_month=row["recurrence_day_of_month"],
             seasonal_start_month=row["seasonal_start_month"],
             seasonal_end_month=row["seasonal_end_month"],
+            solicitation_status=row["solicitation_status"] or "not_started",
+            solicitation_last_generated_at=row["solicitation_last_generated_at"] or "",
+            solicitation_last_sent_at=row["solicitation_last_sent_at"] or "",
+            solicitation_notes=row["solicitation_notes"] or "",
         )
 
     @staticmethod
@@ -189,6 +209,10 @@ class EventRepository:
             event.recurrence_day_of_month,
             event.seasonal_start_month,
             event.seasonal_end_month,
+            event.solicitation_status,
+            EventRepository._clean_str(event.solicitation_last_generated_at),
+            EventRepository._clean_str(event.solicitation_last_sent_at),
+            EventRepository._clean_str(event.solicitation_notes),
         )
 
     @staticmethod

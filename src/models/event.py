@@ -23,3 +23,7 @@ class Event:
     recurrence_day_of_month: Optional[int] = None
     seasonal_start_month: Optional[int] = None
     seasonal_end_month: Optional[int] = None
+    solicitation_status: str = "not_started"
+    solicitation_last_generated_at: str = ""
+    solicitation_last_sent_at: str = ""
+    solicitation_notes: str = ""

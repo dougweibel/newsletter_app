@@ -18,7 +18,7 @@ class MemberListItemWidget(QWidget):
 
         title_label = QLabel(f"{member.full_name}  <{member.email}>")
         title_label.setStyleSheet(
-            "font-size: 14px; font-weight: 600; color: #000000;"
+            "font-size: 14px; font-weight: 600; color: #ffffff;"
         )
         layout.addWidget(title_label)
 
@@ -27,7 +27,7 @@ class MemberListItemWidget(QWidget):
             events_label = QLabel()
             events_label.setText(
                 f'<span style="color: #1c7ed6; font-weight: 600;">Events:</span> '
-                f'<span style="color: #000000;">{events_preview}</span>'
+                f'<span style="color: #ffffff;">{events_preview}</span>'
             )
             events_label.setWordWrap(True)
             layout.addWidget(events_label)
@@ -40,7 +40,7 @@ class MemberListItemWidget(QWidget):
             notes_label = QLabel()
             notes_label.setText(
                 f'<span style="color: #2f9e44; font-weight: 600;">Notes:</span> '
-                f'<span style="color: #000000;">{notes_preview}</span>'
+                f'<span style="color: #ffffff;">{notes_preview}</span>'
             )
             notes_label.setWordWrap(True)
             layout.addWidget(notes_label)

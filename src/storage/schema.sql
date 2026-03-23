@@ -30,6 +30,12 @@ CREATE TABLE IF NOT EXISTS events (
     recurrence_day_of_month INTEGER,
     seasonal_start_month INTEGER CHECK (seasonal_start_month BETWEEN 1 AND 12),
     seasonal_end_month INTEGER CHECK (seasonal_end_month BETWEEN 1 AND 12),
+    solicitation_status TEXT NOT NULL DEFAULT 'not_started' CHECK (
+        solicitation_status IN ('not_started', 'draft_ready', 'sent', 'responded', 'closed')
+    ),
+    solicitation_last_generated_at TEXT,
+    solicitation_last_sent_at TEXT,
+    solicitation_notes TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
