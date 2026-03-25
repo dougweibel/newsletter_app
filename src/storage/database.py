@@ -14,8 +14,6 @@ EVENT_COLUMN_MIGRATIONS: dict[str, str] = {
     "solicitation_last_generated_at": "ALTER TABLE events ADD COLUMN solicitation_last_generated_at TEXT",
     "solicitation_last_sent_at": "ALTER TABLE events ADD COLUMN solicitation_last_sent_at TEXT",
     "solicitation_notes": "ALTER TABLE events ADD COLUMN solicitation_notes TEXT",
-    "solicitation_subject": "ALTER TABLE events ADD COLUMN solicitation_subject TEXT",
-    "solicitation_body": "ALTER TABLE events ADD COLUMN solicitation_body TEXT",
 }
 
 
@@ -32,6 +30,7 @@ def initialize_database() -> None:
         conn.execute("PRAGMA foreign_keys = ON;")
         conn.executescript(schema.read_text(encoding="utf-8"))
         _migrate_events_table(conn)
+        _normalize_event_defaults(conn)
         conn.commit()
 
 
@@ -44,3 +43,13 @@ def _migrate_events_table(conn: sqlite3.Connection) -> None:
     for column_name, statement in EVENT_COLUMN_MIGRATIONS.items():
         if column_name not in columns:
             conn.execute(statement)
+
+
+def _normalize_event_defaults(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        UPDATE events
+        SET publicity_lead_months = 1
+        WHERE publicity_lead_months IS NULL OR publicity_lead_months < 1
+        """
+    )

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS events (
     location TEXT,
     contact_info TEXT,
     other_info TEXT,
-    publicity_lead_months INTEGER NOT NULL DEFAULT 0 CHECK (publicity_lead_months >= 0),
+    publicity_lead_months INTEGER NOT NULL DEFAULT 1 CHECK (publicity_lead_months >= 1),
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'cancelled')),
     recurrence_frequency TEXT CHECK (recurrence_frequency IN ('weekly', 'monthly', 'yearly')),
     recurrence_interval INTEGER,
@@ -36,8 +36,6 @@ CREATE TABLE IF NOT EXISTS events (
     solicitation_last_generated_at TEXT,
     solicitation_last_sent_at TEXT,
     solicitation_notes TEXT,
-    solicitation_subject TEXT,
-    solicitation_body TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

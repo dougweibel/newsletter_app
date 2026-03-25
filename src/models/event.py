@@ -13,7 +13,7 @@ class Event:
     location: str = ""
     contact_info: str = ""
     other_info: str = ""
-    publicity_lead_months: int = 0
+    publicity_lead_months: int = 1
     status: str = "active"
     recurrence_frequency: str = ""
     recurrence_interval: Optional[int] = None

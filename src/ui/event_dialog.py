@@ -41,7 +41,8 @@ class EventDialog(QDialog):
         self.other_info_edit = QTextEdit()
 
         self.publicity_lead_months_spin = QSpinBox()
-        self.publicity_lead_months_spin.setRange(0, 24)
+        self.publicity_lead_months_spin.setRange(1, 24)
+        self.publicity_lead_months_spin.setValue(1)
 
         self.status_combo = QComboBox()
         self.status_combo.addItems(["active", "cancelled"])
