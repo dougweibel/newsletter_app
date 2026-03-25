@@ -115,6 +115,8 @@ def test_update_event() -> None:
             solicitation_last_generated_at="2026-03-22 10:00",
             solicitation_last_sent_at="2026-03-23 11:00",
             solicitation_notes="Waiting on updated copy.",
+            solicitation_subject="Subject line",
+            solicitation_body="Body text",
         )
     )
 
@@ -131,6 +133,8 @@ def test_update_event() -> None:
     assert updated.solicitation_last_generated_at == "2026-03-22 10:00"
     assert updated.solicitation_last_sent_at == "2026-03-23 11:00"
     assert updated.solicitation_notes == "Waiting on updated copy."
+    assert updated.solicitation_subject == "Subject line"
+    assert updated.solicitation_body == "Body text"
 
 
 

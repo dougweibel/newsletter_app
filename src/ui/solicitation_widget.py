@@ -180,7 +180,7 @@ class SolicitationWidget(QWidget):
             return
 
         self.current_event = event
-        self._populate_from_event(event, clear_generated_text=True)
+        self._populate_from_event(event)
 
     def generate_draft(self) -> None:
         if self.current_event is None or self.current_event.id is None:
@@ -190,24 +190,24 @@ class SolicitationWidget(QWidget):
         members = self.member_event_repository.list_members_for_event(self.current_event.id)
         subject = SolicitationService.build_subject(self.current_event)
         body = SolicitationService.build_body(self.current_event, members)
+        generated_at = SolicitationService.now_timestamp()
+
         self.subject_edit.setPlainText(subject)
         self.body_edit.setPlainText(body)
-
-        self.current_event.solicitation_status = SolicitationService.recommended_status_after_generate()
-        self.current_event.solicitation_last_generated_at = SolicitationService.now_timestamp()
-        self.status_combo.setCurrentText(self.current_event.solicitation_status)
-        self.generated_at_label.setText(self.current_event.solicitation_last_generated_at)
+        self.current_event.solicitation_subject = subject
+        self.current_event.solicitation_body = body
+        self.current_event.solicitation_last_generated_at = generated_at
+        self.generated_at_label.setText(generated_at)
         self._persist_current_event(
             show_message=True,
-            message="Solicitation draft generated and workflow state saved.",
-            preserve_generated_text=True,
+            message="Solicitation draft generated and saved.",
         )
 
     def save_workflow_state(self) -> None:
         if self.current_event is None:
             QMessageBox.warning(self, "No Event", "Please select an event first.")
             return
-        self._persist_current_event(show_message=True, message="Workflow state saved.", preserve_generated_text=True)
+        self._persist_current_event(show_message=True, message="Workflow state saved.")
 
     def mark_draft_ready(self) -> None:
         if self.current_event is None:
@@ -218,7 +218,7 @@ class SolicitationWidget(QWidget):
         if not self.current_event.solicitation_last_generated_at:
             self.current_event.solicitation_last_generated_at = SolicitationService.now_timestamp()
             self.generated_at_label.setText(self.current_event.solicitation_last_generated_at)
-        self._persist_current_event(show_message=True, message="Event marked as draft ready.", preserve_generated_text=True)
+        self._persist_current_event(show_message=True, message="Event marked as draft ready.")
 
     def mark_sent(self) -> None:
         if self.current_event is None:
@@ -228,7 +228,7 @@ class SolicitationWidget(QWidget):
         self.status_combo.setCurrentText("sent")
         self.current_event.solicitation_last_sent_at = SolicitationService.now_timestamp()
         self.sent_at_label.setText(self.current_event.solicitation_last_sent_at)
-        self._persist_current_event(show_message=True, message="Event marked as sent.", preserve_generated_text=True)
+        self._persist_current_event(show_message=True, message="Event marked as sent.")
 
     def mark_responded(self) -> None:
         if self.current_event is None:
@@ -236,7 +236,7 @@ class SolicitationWidget(QWidget):
             return
 
         self.status_combo.setCurrentText("responded")
-        self._persist_current_event(show_message=True, message="Event marked as responded.", preserve_generated_text=True)
+        self._persist_current_event(show_message=True, message="Event marked as responded.")
 
     def reset_workflow(self) -> None:
         if self.current_event is None:
@@ -256,23 +256,16 @@ class SolicitationWidget(QWidget):
         self.current_event.solicitation_last_sent_at = ""
         self.generated_at_label.setText("—")
         self.sent_at_label.setText("—")
-        self._persist_current_event(show_message=True, message="Solicitation workflow reset.", preserve_generated_text=True)
+        self._persist_current_event(show_message=True, message="Solicitation workflow reset.")
 
-    def _persist_current_event(
-        self,
-        *,
-        show_message: bool,
-        message: str,
-        preserve_generated_text: bool,
-    ) -> None:
+    def _persist_current_event(self, *, show_message: bool, message: str) -> None:
         if self.current_event is None:
             return
 
-        subject_text = self.subject_edit.toPlainText()
-        body_text = self.body_edit.toPlainText()
-
         self.current_event.solicitation_status = self.status_combo.currentText()
         self.current_event.solicitation_notes = self.notes_edit.toPlainText().strip()
+        self.current_event.solicitation_subject = self.subject_edit.toPlainText().strip()
+        self.current_event.solicitation_body = self.body_edit.toPlainText().strip()
         self._normalize_workflow_fields_for_status(self.current_event)
         self.event_repository.update_event(self.current_event)
 
@@ -281,29 +274,26 @@ class SolicitationWidget(QWidget):
         reloaded_event = self.event_repository.get_event(event_id) if event_id is not None else None
         if reloaded_event is not None:
             self.current_event = reloaded_event
-            self._populate_from_event(reloaded_event, clear_generated_text=not preserve_generated_text)
-            if preserve_generated_text:
-                self.subject_edit.setPlainText(subject_text)
-                self.body_edit.setPlainText(body_text)
+            self._populate_from_event(reloaded_event)
 
         if show_message:
             QMessageBox.information(self, "Saved", message)
 
-    def _populate_from_event(self, event: Event, *, clear_generated_text: bool) -> None:
+    def _populate_from_event(self, event: Event) -> None:
         members = self.member_event_repository.list_members_for_event(event.id) if event.id else []
         due_text = self._due_text(event)
         self.summary_label.setText(
             f"{event.title}\nEvent status: {event.status}\nSolicitation status: {self.STATUS_LABELS.get(event.solicitation_status, event.solicitation_status)}"
         )
-        self.members_label.setText(", ".join(member.full_name for member in members) or "No associated members")
+        member_lines = [f"{member.full_name} <{member.email}>" for member in members]
+        self.members_label.setText("\n".join(member_lines) or "No associated members")
         self.timeline_label.setText(due_text)
         self.status_combo.setCurrentText(event.solicitation_status)
         self.generated_at_label.setText(event.solicitation_last_generated_at or "—")
         self.sent_at_label.setText(event.solicitation_last_sent_at or "—")
         self.notes_edit.setPlainText(event.solicitation_notes)
-        if clear_generated_text:
-            self.subject_edit.setPlainText("")
-            self.body_edit.setPlainText("")
+        self.subject_edit.setPlainText(event.solicitation_subject)
+        self.body_edit.setPlainText(event.solicitation_body)
 
     def _normalize_workflow_fields_for_status(self, event: Event) -> None:
         status = event.solicitation_status

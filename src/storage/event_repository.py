@@ -30,7 +30,9 @@ class EventRepository:
                     solicitation_status,
                     solicitation_last_generated_at,
                     solicitation_last_sent_at,
-                    solicitation_notes
+                    solicitation_notes,
+                    solicitation_subject,
+                    solicitation_body
                 FROM events
                 ORDER BY title COLLATE NOCASE, id
                 """
@@ -65,7 +67,9 @@ class EventRepository:
                     solicitation_status,
                     solicitation_last_generated_at,
                     solicitation_last_sent_at,
-                    solicitation_notes
+                    solicitation_notes,
+                    solicitation_subject,
+                    solicitation_body
                 FROM events
                 WHERE id = ?
                 """,
@@ -74,7 +78,6 @@ class EventRepository:
 
         if row is None:
             return None
-
         return self._row_to_event(row)
 
     def create_event(self, event: Event) -> int:
@@ -103,8 +106,11 @@ class EventRepository:
                     solicitation_status,
                     solicitation_last_generated_at,
                     solicitation_last_sent_at,
-                    solicitation_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    solicitation_notes,
+                    solicitation_subject,
+                    solicitation_body
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 self._event_values(event),
             )
@@ -142,6 +148,8 @@ class EventRepository:
                     solicitation_last_generated_at = ?,
                     solicitation_last_sent_at = ?,
                     solicitation_notes = ?,
+                    solicitation_subject = ?,
+                    solicitation_body = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
@@ -186,6 +194,8 @@ class EventRepository:
             solicitation_last_generated_at=row["solicitation_last_generated_at"] or "",
             solicitation_last_sent_at=row["solicitation_last_sent_at"] or "",
             solicitation_notes=row["solicitation_notes"] or "",
+            solicitation_subject=row["solicitation_subject"] or "",
+            solicitation_body=row["solicitation_body"] or "",
         )
 
     @staticmethod
@@ -213,6 +223,8 @@ class EventRepository:
             EventRepository._clean_str(event.solicitation_last_generated_at),
             EventRepository._clean_str(event.solicitation_last_sent_at),
             EventRepository._clean_str(event.solicitation_notes),
+            EventRepository._clean_str(event.solicitation_subject),
+            EventRepository._clean_str(event.solicitation_body),
         )
 
     @staticmethod

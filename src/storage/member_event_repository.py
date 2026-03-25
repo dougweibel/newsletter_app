@@ -83,7 +83,9 @@ class MemberEventRepository:
                     e.solicitation_status,
                     e.solicitation_last_generated_at,
                     e.solicitation_last_sent_at,
-                    e.solicitation_notes
+                    e.solicitation_notes,
+                    e.solicitation_subject,
+                    e.solicitation_body
                 FROM events e
                 INNER JOIN member_events me ON me.event_id = e.id
                 WHERE me.member_id = ?
@@ -148,4 +150,6 @@ class MemberEventRepository:
             solicitation_last_generated_at=row["solicitation_last_generated_at"] or "",
             solicitation_last_sent_at=row["solicitation_last_sent_at"] or "",
             solicitation_notes=row["solicitation_notes"] or "",
+            solicitation_subject=row["solicitation_subject"] or "",
+            solicitation_body=row["solicitation_body"] or "",
         )

@@ -28,3 +28,5 @@ def test_database_adds_solicitation_columns() -> None:
     assert "solicitation_last_generated_at" in columns
     assert "solicitation_last_sent_at" in columns
     assert "solicitation_notes" in columns
+    assert "solicitation_subject" in columns
+    assert "solicitation_body" in columns

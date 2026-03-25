@@ -14,6 +14,8 @@ EVENT_COLUMN_MIGRATIONS: dict[str, str] = {
     "solicitation_last_generated_at": "ALTER TABLE events ADD COLUMN solicitation_last_generated_at TEXT",
     "solicitation_last_sent_at": "ALTER TABLE events ADD COLUMN solicitation_last_sent_at TEXT",
     "solicitation_notes": "ALTER TABLE events ADD COLUMN solicitation_notes TEXT",
+    "solicitation_subject": "ALTER TABLE events ADD COLUMN solicitation_subject TEXT",
+    "solicitation_body": "ALTER TABLE events ADD COLUMN solicitation_body TEXT",
 }
 
 

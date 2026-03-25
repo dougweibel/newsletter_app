@@ -27,3 +27,5 @@ class Event:
     solicitation_last_generated_at: str = ""
     solicitation_last_sent_at: str = ""
     solicitation_notes: str = ""
+    solicitation_subject: str = ""
+    solicitation_body: str = ""

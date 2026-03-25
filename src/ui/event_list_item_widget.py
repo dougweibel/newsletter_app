@@ -12,7 +12,7 @@ class EventListItemWidget(QWidget):
         layout.setSpacing(4)
 
         header = QLabel(self._format_header(event_record))
-        header.setStyleSheet("font-size: 14px; font-weight: 600; color: #ffffff;")
+        header.setStyleSheet("font-size: 14px; font-weight: 600; color: #102a43;")
         header.setWordWrap(True)
         layout.addWidget(header)
 
@@ -21,7 +21,7 @@ class EventListItemWidget(QWidget):
             members_label = QLabel()
             members_label.setText(
                 f'<span style="color: #1c7ed6; font-weight: 600;">Members:</span> '
-                f'<span style="color: #ffffff;">{members_preview}</span>'
+                f'<span style="color: #334e68;">{members_preview}</span>'
             )
             members_label.setWordWrap(True)
             layout.addWidget(members_label)
@@ -39,7 +39,7 @@ class EventListItemWidget(QWidget):
             details_label = QLabel()
             details_label.setText(
                 f'<span style="color: #2f9e44; font-weight: 600;">Details:</span> '
-                f'<span style="color: #ffffff;">{details_preview}</span>'
+                f'<span style="color: #334e68;">{details_preview}</span>'
             )
             details_label.setWordWrap(True)
             layout.addWidget(details_label)
