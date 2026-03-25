@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 from src.ui.members_widget import MembersWidget
 from src.ui.events_widget import EventsWidget
 from src.ui.solicitation_widget import SolicitationWidget
+from src.ui.newsletter_widget import NewsletterWidget
 
 
 class MainWindow(QMainWindow):
@@ -44,7 +45,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(solicitation_button)
 
         newsletter_button = QPushButton("Generate Newsletter File")
-        newsletter_button.clicked.connect(self.show_placeholder)
+        newsletter_button.clicked.connect(self.show_newsletter)
         layout.addWidget(newsletter_button)
 
         layout.addStretch()
@@ -109,9 +110,6 @@ class MainWindow(QMainWindow):
         self.solicitation_window = SolicitationWidget()
         self.solicitation_window.show()
 
-    def show_placeholder(self) -> None:
-        QMessageBox.information(
-            self,
-            "Coming Soon",
-            "This workflow will be added in a later milestone.",
-        )
+    def show_newsletter(self) -> None:
+        self.newsletter_window = NewsletterWidget()
+        self.newsletter_window.show()
