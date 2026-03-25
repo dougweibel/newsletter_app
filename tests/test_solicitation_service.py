@@ -29,7 +29,7 @@ def test_build_subject_and_body() -> None:
     assert "Hello Avery and Blair," in body
     assert "We are gathering newsletter information for Spring Picnic." in body
     assert "Riverside Park" in body
-    assert "2026-03-31" in body
+    assert "A good target for sending the solicitation" not in body
 
 
 def test_estimated_solicitation_due_date_for_one_time_event() -> None:
@@ -81,3 +81,24 @@ def test_estimated_solicitation_due_date_enforces_minimum_one_month() -> None:
 
     assert due_date is not None
     assert due_date.isoformat() == "2026-04-05"
+
+
+def test_estimated_due_date_for_winter_season_event() -> None:
+    event = Event(
+        id=1,
+        title="Winter Lecture Series",
+        event_kind="recurring",
+        recurrence_frequency="monthly",
+        recurrence_interval=1,
+        recurrence_start_date="2026-11-15",
+        recurrence_day_of_month=15,
+        seasonal_start_month=11,
+        seasonal_end_month=4,
+        publicity_lead_months=1,
+    )
+
+    next_occurrence = SolicitationService.next_occurrence_date(event, today=date(2027, 1, 20))
+    due_date = SolicitationService.estimated_solicitation_due_date(event, today=date(2027, 1, 20))
+
+    assert next_occurrence == date(2027, 2, 15)
+    assert due_date == date(2026, 12, 31)

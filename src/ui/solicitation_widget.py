@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QListWidget,
     QListWidgetItem,
     QMessageBox,
@@ -74,8 +75,9 @@ class SolicitationWidget(QWidget):
         right_panel.addWidget(self.summary_label)
 
         details_form = QFormLayout()
-        self.members_label = QLabel("")
-        self.members_label.setWordWrap(True)
+        self.members_label = QTextEdit()
+        self.members_label.setReadOnly(True)
+        self.members_label.setFixedHeight(52)
         self.timeline_label = QLabel("")
         self.timeline_label.setWordWrap(True)
         self.status_combo = QComboBox()
@@ -95,14 +97,13 @@ class SolicitationWidget(QWidget):
         right_panel.addWidget(QLabel("Workflow Notes"))
         right_panel.addWidget(self.notes_edit, 1)
 
-        self.subject_edit = QTextEdit()
-        self.subject_edit.setMaximumHeight(70)
+        self.subject_edit = QLineEdit()
         right_panel.addWidget(QLabel("Solicitation Subject"))
         right_panel.addWidget(self.subject_edit)
 
         self.body_edit = QTextEdit()
         right_panel.addWidget(QLabel("Solicitation Body"))
-        right_panel.addWidget(self.body_edit, 2)
+        right_panel.addWidget(self.body_edit, 3)
 
         button_row = QHBoxLayout()
         self.generate_button = QPushButton("Generate Draft")
@@ -190,7 +191,7 @@ class SolicitationWidget(QWidget):
         members = self.member_event_repository.list_members_for_event(self.current_event.id)
         subject = SolicitationService.build_subject(self.current_event)
         body = SolicitationService.build_body(self.current_event, members)
-        self.subject_edit.setPlainText(subject)
+        self.subject_edit.setText(subject)
         self.body_edit.setPlainText(body)
 
         self.current_event.solicitation_status = SolicitationService.recommended_status_after_generate()
@@ -268,7 +269,7 @@ class SolicitationWidget(QWidget):
         if self.current_event is None:
             return
 
-        subject_text = self.subject_edit.toPlainText()
+        subject_text = self.subject_edit.text()
         body_text = self.body_edit.toPlainText()
 
         self.current_event.solicitation_status = self.status_combo.currentText()
@@ -283,7 +284,7 @@ class SolicitationWidget(QWidget):
             self.current_event = reloaded_event
             self._populate_from_event(reloaded_event, clear_generated_text=not preserve_generated_text)
             if preserve_generated_text:
-                self.subject_edit.setPlainText(subject_text)
+                self.subject_edit.setText(subject_text)
                 self.body_edit.setPlainText(body_text)
 
         if show_message:
@@ -295,7 +296,7 @@ class SolicitationWidget(QWidget):
         self.summary_label.setText(
             f"{event.title}\nEvent status: {event.status}\nSolicitation status: {self.STATUS_LABELS.get(event.solicitation_status, event.solicitation_status)}"
         )
-        self.members_label.setText(
+        self.members_label.setPlainText(
             ", ".join(f"{member.full_name} <{member.email}>" for member in members) or "No associated members"
         )
         self.timeline_label.setText(due_text)
@@ -304,7 +305,7 @@ class SolicitationWidget(QWidget):
         self.sent_at_label.setText(event.solicitation_last_sent_at or "—")
         self.notes_edit.setPlainText(event.solicitation_notes)
         if clear_generated_text:
-            self.subject_edit.setPlainText("")
+            self.subject_edit.clear()
             self.body_edit.setPlainText("")
 
     def _normalize_workflow_fields_for_status(self, event: Event) -> None:
@@ -339,12 +340,12 @@ class SolicitationWidget(QWidget):
 
     def _clear_details(self) -> None:
         self.summary_label.setText("Select an event to begin.")
-        self.members_label.setText("")
+        self.members_label.setPlainText("")
         self.timeline_label.setText("")
         self.generated_at_label.setText("")
         self.sent_at_label.setText("")
         self.notes_edit.setPlainText("")
-        self.subject_edit.setPlainText("")
+        self.subject_edit.clear()
         self.body_edit.setPlainText("")
 
     def _filtered_events(self, events: list[Event]) -> list[Event]:

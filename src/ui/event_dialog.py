@@ -1,4 +1,5 @@
 from PySide6.QtCore import QDate, Qt
+from PySide6.QtGui import QValidator
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -17,6 +18,40 @@ from PySide6.QtWidgets import (
 from src.models.event import Event
 from src.storage.member_event_repository import MemberEventRepository
 from src.storage.member_repository import MemberRepository
+
+
+class WeekdaySpinBox(QSpinBox):
+    DAY_LABELS = {
+        0: "",
+        1: "Monday",
+        2: "Tuesday",
+        3: "Wednesday",
+        4: "Thursday",
+        5: "Friday",
+        6: "Saturday",
+        7: "Sunday",
+    }
+
+    def textFromValue(self, value: int) -> str:
+        return self.DAY_LABELS.get(value, "")
+
+    def valueFromText(self, text: str) -> int:
+        normalized = text.strip().lower()
+        for value, label in self.DAY_LABELS.items():
+            if label.lower() == normalized:
+                return value
+        return 0
+
+    def validate(self, input_text: str, pos: int):
+        normalized = input_text.strip().lower()
+        valid_labels = [label.lower() for label in self.DAY_LABELS.values() if label]
+        if not normalized:
+            return (QValidator.State.Acceptable, input_text, pos)
+        if normalized in valid_labels:
+            return (QValidator.State.Acceptable, input_text, pos)
+        if any(label.startswith(normalized) for label in valid_labels):
+            return (QValidator.State.Intermediate, input_text, pos)
+        return (QValidator.State.Invalid, input_text, pos)
 
 
 class EventDialog(QDialog):
@@ -58,7 +93,7 @@ class EventDialog(QDialog):
         self.has_recurrence_end_date_checkbox = QCheckBox("Has end date")
         self.recurrence_end_date_edit = self._build_date_edit()
 
-        self.recurrence_day_of_week_spin = QSpinBox()
+        self.recurrence_day_of_week_spin = WeekdaySpinBox()
         self.recurrence_day_of_week_spin.setRange(0, 7)
         self.recurrence_day_of_week_spin.setSpecialValueText("")
 
@@ -76,6 +111,8 @@ class EventDialog(QDialog):
 
         self.associated_members_list = QListWidget()
         self.associated_members_list.setMinimumHeight(180)
+
+        self._apply_uniform_field_width()
 
         layout = QFormLayout(self)
         layout.addRow("Title", self.title_edit)
@@ -112,6 +149,33 @@ class EventDialog(QDialog):
 
         self._load_member_choices()
         self._update_enabled_states()
+
+
+    def _apply_uniform_field_width(self) -> None:
+        field_width = 420
+        widgets = [
+            self.title_edit,
+            self.description_edit,
+            self.event_kind_combo,
+            self.one_time_date_edit,
+            self.time_text_edit,
+            self.location_edit,
+            self.contact_info_edit,
+            self.other_info_edit,
+            self.publicity_lead_months_spin,
+            self.status_combo,
+            self.recurrence_frequency_combo,
+            self.recurrence_interval_spin,
+            self.recurrence_start_date_edit,
+            self.recurrence_end_date_edit,
+            self.recurrence_day_of_week_spin,
+            self.recurrence_day_of_month_spin,
+            self.seasonal_start_month_spin,
+            self.seasonal_end_month_spin,
+            self.associated_members_list,
+        ]
+        for widget in widgets:
+            widget.setMinimumWidth(field_width)
 
     def _build_date_edit(self) -> QDateEdit:
         widget = QDateEdit()

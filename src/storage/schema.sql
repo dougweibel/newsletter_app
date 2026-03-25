@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS events (
     solicitation_last_generated_at TEXT,
     solicitation_last_sent_at TEXT,
     solicitation_notes TEXT,
+    solicitation_subject TEXT,
+    solicitation_body TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

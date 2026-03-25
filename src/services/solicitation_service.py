@@ -20,16 +20,12 @@ class SolicitationService:
     @staticmethod
     def build_body(event: Event, members: list[Member]) -> str:
         greeting = SolicitationService._greeting(members)
-        timeline_line = SolicitationService._timeline_line(event)
         detail_lines = SolicitationService._event_detail_lines(event)
 
         sections = [
             greeting,
             "",
-            (
-                f"We are gathering newsletter information for {event.title}. "
-                f"{timeline_line}"
-            ),
+            f"We are gathering newsletter information for {event.title}.",
             "",
             "Current event details on file:",
             *detail_lines,
@@ -76,13 +72,6 @@ class SolicitationService:
         ]
         detail_lines = [f"- {label}: {value}" for label, value in values if value]
         return detail_lines or ["- No event details are currently stored."]
-
-    @staticmethod
-    def _timeline_line(event: Event) -> str:
-        due_date = SolicitationService.estimated_solicitation_due_date(event)
-        if due_date is None:
-            return "This event does not yet have enough date information to calculate a solicitation window."
-        return f"A good target for sending the solicitation is around {due_date.isoformat()}."
 
     @staticmethod
     def estimated_solicitation_due_date(event: Event, *, today: date | None = None) -> date | None:
